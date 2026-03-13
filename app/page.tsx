@@ -1,4 +1,12 @@
-export default function Home() {
+import { createSupabaseServerClient } from "@/lib/supabase/server-client";
+
+export default async function Home() {
+  const supabase = await createSupabaseServerClient();
+
+  const { count: recipeCount, error } = await supabase
+    .from("recipes")
+    .select("*", { count: "exact", head: true });
+
   return (
     <div className="min-h-screen bg-zinc-50 font-sans text-zinc-900 dark:bg-zinc-950 dark:text-zinc-50">
       <main className="mx-auto flex min-h-screen max-w-6xl flex-col gap-12 px-4 py-10 sm:px-8 lg:px-12 lg:py-14">
@@ -42,7 +50,11 @@ export default function Home() {
                   Supabase-powered backend
                 </dt>
                 <dd className="mt-1">
-                  Auth, Postgres, and image storage ready to plug in next.
+                  {error
+                    ? "Connection error – check Supabase env vars and RLS."
+                    : `Connected · ${
+                        recipeCount ?? 0
+                      } recipe${(recipeCount ?? 0) === 1 ? "" : "s"} in the database.`}
                 </dd>
               </div>
               <div>
